@@ -10,8 +10,6 @@ fn int main(String[] args) => @pool()
 	}
 	char[] code = file::load_temp(args[1]) ?? args[1][..];
 
-	Bf interpreter;
-	interpreter.init();
-	return interpreter.interpret((String)code[..])!!;
+	return bf::interpret((String)code[..])!!;
 }
 
