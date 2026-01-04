@@ -7,7 +7,8 @@ fn char mod256(int v, int step) @inline => (char)((v + step + 256) % 256);
 fn int? interpret(String s, InStream r = io::stdin(), OutStream w = io::stdout()) => @pool()
 {
 	char[30_000] data;
-	usz pos;
+	char *pos = &data[0];
+	int depth;
 
 	List{usz} jumps;
 	jumps.tinit();
@@ -18,16 +19,16 @@ fn int? interpret(String s, InStream r = io::stdin(), OutStream w = io::stdout()
 		{
 			case '>': pos++;
 			case '<': pos--;
-			case '+': data[pos] = mod256(data[pos], 1);
-			case '-': data[pos] = mod256(data[pos], -1);
-			case ',': data[pos] = r.read_byte()!;
-			case '.': w.write_byte(data[pos])!; if (&w.flush) w.flush()!;
+			case '+': *pos = mod256(*pos, 1);
+			case '-': *pos = mod256(*pos, -1);
+			case ',': *pos = r.read_byte()!;
+			case '.': w.write_byte(*pos)!; if (&w.flush) w.flush()!;
 			case '[':
-				if (data[pos] == 0)
+				if (*pos == 0)
 				{
 					// Jump forward to end of matching ']'
 					i++; // Consume '['
-					int depth = 1;
+					depth = 1;
 					while (i < s.len && depth != 0)
 					{
 						switch (s[i])
@@ -44,7 +45,7 @@ fn int? interpret(String s, InStream r = io::stdin(), OutStream w = io::stdout()
 					jumps.push(i);
 				}
 			case ']':
-				if (data[pos] != 0)
+				if (*pos != 0)
 				{
 					// Jump backwards to begin of matching '['
 					i = jumps.last()!;
@@ -57,6 +58,7 @@ fn int? interpret(String s, InStream r = io::stdin(), OutStream w = io::stdout()
 			default: continue;
 		}
 	}
+	assert(jumps.len() == 0);
 	return 0;
 }
 
