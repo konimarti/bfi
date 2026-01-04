@@ -63,7 +63,8 @@ fn int? interpret(String s, InStream r = io::stdin(), OutStream w = io::stdout()
 fn void test_hello_world() @test => @assert_leak()
 {
 
-	String input    = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+	String input    = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>."
+                          ">---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 	String expected = "Hello World!\n";
 
 	char[32] buf;
@@ -72,4 +73,27 @@ fn void test_hello_world() @test => @assert_leak()
 
 	interpret(s: input, w: &bw)!!;
 	assert(buf[:13] == expected[..]);
+}
+
+module bf_bench;
+
+import bf, std::io;
+
+fn void init() @init
+{
+	set_benchmark_warmup_iterations(5);
+	set_benchmark_max_iterations(1_000_000);
+}
+
+fn void bench_hello_world() @benchmark
+{
+
+	const String INPUT = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>."
+                             ">---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+
+	char[32] buf;
+	ByteWriter bw;
+	bw.init_with_buffer(buf[..]);
+
+	bf::interpret(s: INPUT, w: &bw)!!;
 }
